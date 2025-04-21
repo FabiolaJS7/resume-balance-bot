@@ -1,7 +1,6 @@
 package com.bootcamp.resume.balance.bot.service;
 
 import com.bootcamp.commons.bean.finance.ResumeRequest;
-import com.bootcamp.commons.bean.products.ProductResponse;
 import com.bootcamp.resume.balance.bot.connector.FinanceConnector;
 import com.bootcamp.resume.balance.bot.connector.ProductConnector;
 import com.bootcamp.resume.balance.bot.constants.ProductTypeConstants;
@@ -9,7 +8,6 @@ import com.bootcamp.resume.balance.bot.util.JsonTransferUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -27,7 +25,7 @@ public class ResumeServiceImpl implements ResumeService {
     public void saveResumes() {
 
         productConnector.getProducts()
-                .doOnNext(productResponse -> log.info("1. Getting products SA."))
+                .doOnNext(productResponse -> log.info("1. Getting products."))
                 .flatMap(productResponse -> {
                     log.info("2. Creating resume request of product {}.", productResponse.getId());
                     return productConnector.findBalanceByProductId(productResponse.getId())

@@ -1,5 +1,7 @@
 package com.bootcamp.resume.balance.bot.connector;
 
+import com.bootcamp.commons.bean.finance.DebtRequest;
+import com.bootcamp.commons.bean.finance.DebtResponse;
 import com.bootcamp.commons.bean.finance.ResumeRequest;
 import com.bootcamp.commons.bean.finance.ResumeResponse;
 import com.bootcamp.resume.balance.bot.util.JsonTransferUtil;
@@ -20,7 +22,6 @@ public class FinanceConnector {
     }
 
     public Mono<ResumeResponse> createResume(Mono<ResumeRequest> resumeRequest) {
-        log.info("API Create Resume RQ: {}", JsonTransferUtil.objectToJson(resumeRequest));
         return resumeRequest
                 .doOnNext(rq -> log.info("API Create resume RQ: {}", JsonTransferUtil.objectToJson(rq)))
                 .flatMap(rq -> webClient.post()
@@ -31,6 +32,19 @@ public class FinanceConnector {
                         .doOnNext(resumeResponse -> log.info("API Create Resume RS: {}",
                                 JsonTransferUtil.objectToJson(resumeResponse)))
                         .doOnError(throwable -> log.error("API error create resume {}", throwable.getMessage()))
+                );
+    }
+
+    public Mono<DebtResponse> createDebt(Mono<DebtRequest> debtRequest) {
+        return debtRequest
+                .doOnNext(rq -> log.info("API create debt RQ {}", JsonTransferUtil.objectToJson(rq)))
+                .flatMap(rq -> webClient.post()
+                        .uri("/api/finance/debts")
+                        .bodyValue(rq)
+                        .retrieve()
+                        .bodyToMono(DebtResponse.class)
+                        .doOnNext(rs -> log.info("API create debt RS {}", JsonTransferUtil.objectToJson(rs)))
+                        .doOnError(throwable -> log.error("API error create debt {}", throwable.getMessage()))
                 );
     }
 }
