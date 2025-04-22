@@ -12,14 +12,13 @@ import com.bootcamp.resume.balance.bot.util.JsonTransferUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 
 @Service
 @Slf4j
-public class DebtServiceImpl implements DebtService{
+public class DebtServiceImpl implements DebtService {
 
     private static final int NEXT_MONTH = 1;
     private static final int INVOICE_DAY = 20;

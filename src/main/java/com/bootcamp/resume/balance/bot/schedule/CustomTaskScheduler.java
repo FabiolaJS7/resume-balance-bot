@@ -26,7 +26,7 @@ public class CustomTaskScheduler {
     }
 
     //@Scheduled(cron = "0 */1 * * * *")
-    @Scheduled(cron = "0 0 0 15 * *") // Corre a las 00:00 del día 15 de cada mes
+    @Scheduled(cron = "0 0 0 15 * *") // Corre a las 00:00 del día 15 de cada mes para guardar las deudas de los productos de crédito
     void generateDebt() {
         log.info("Processing tasks to generate debt");
         debtService.saveDebtToCreditProducts();

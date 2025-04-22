@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class WebClientProductApi {
 
-    @Value("${client.product.service}")
+    @Value("${client.api.gateway}")
     String clientProduct;
 
     @Bean(name = "webClientProductService")
