@@ -16,35 +16,43 @@ import reactor.core.publisher.Mono;
 public class FinanceConnector {
 
     WebClient webClient;
+    AuthConnector authConnector;
 
-    public FinanceConnector(@Qualifier("webClientFinanceService") WebClient webClient) {
+    public FinanceConnector(@Qualifier("webClientService") WebClient webClient, AuthConnector authConnector) {
         this.webClient = webClient;
+        this.authConnector = authConnector;
     }
 
     public Mono<ResumeResponse> createResume(Mono<ResumeRequest> resumeRequest) {
-        return resumeRequest
-                .doOnNext(rq -> log.info("API Create resume RQ: {}", JsonTransferUtil.objectToJson(rq)))
-                .flatMap(rq -> webClient.post()
-                        .uri("/api/finance/resumes")
-                        .bodyValue(rq)
-                        .retrieve()
-                        .bodyToMono(ResumeResponse.class)
-                        .doOnNext(resumeResponse -> log.info("API Create Resume RS: {}",
-                                JsonTransferUtil.objectToJson(resumeResponse)))
-                        .doOnError(throwable -> log.error("API error create resume {}", throwable.getMessage()))
+        return authConnector.getAuthToken()
+                .flatMap(token -> resumeRequest
+                        .doOnNext(rq -> log.info("API Create resume RQ: {}", JsonTransferUtil.objectToJson(rq)))
+                        .flatMap(rq -> webClient.post()
+                                .uri("/api/finance/resumes")
+                                .header("Authorization", token)
+                                .bodyValue(rq)
+                                .retrieve()
+                                .bodyToMono(ResumeResponse.class)
+                                .doOnNext(resumeResponse -> log.info("API Create Resume RS: {}",
+                                        JsonTransferUtil.objectToJson(resumeResponse)))
+                                .doOnError(throwable -> log.error("API error create resume {}", throwable.getMessage()))
+                        )
                 );
     }
 
     public Mono<DebtResponse> createDebt(Mono<DebtRequest> debtRequest) {
-        return debtRequest
-                .doOnNext(rq -> log.info("API create debt RQ {}", JsonTransferUtil.objectToJson(rq)))
-                .flatMap(rq -> webClient.post()
-                        .uri("/api/finance/debts")
-                        .bodyValue(rq)
-                        .retrieve()
-                        .bodyToMono(DebtResponse.class)
-                        .doOnNext(rs -> log.info("API create debt RS {}", JsonTransferUtil.objectToJson(rs)))
-                        .doOnError(throwable -> log.error("API error create debt {}", throwable.getMessage()))
+        return authConnector.getAuthToken()
+                .flatMap(token -> debtRequest
+                        .doOnNext(rq -> log.info("API create debt RQ {}", JsonTransferUtil.objectToJson(rq)))
+                        .flatMap(rq -> webClient.post()
+                                .uri("/api/finance/debts")
+                                .header("Authorization", token)
+                                .bodyValue(rq)
+                                .retrieve()
+                                .bodyToMono(DebtResponse.class)
+                                .doOnNext(rs -> log.info("API create debt RS {}", JsonTransferUtil.objectToJson(rs)))
+                                .doOnError(throwable -> log.error("API error create debt {}", throwable.getMessage()))
+                        )
                 );
     }
 }

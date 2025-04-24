@@ -15,30 +15,38 @@ import reactor.core.publisher.Mono;
 public class ProductConnector {
 
     WebClient webClient;
+    AuthConnector authConnector;
 
-    public ProductConnector(@Qualifier("webClientProductService") WebClient webClient) {
+    public ProductConnector(@Qualifier("webClientService") WebClient webClient, AuthConnector authConnector) {
         this.webClient = webClient;
+        this.authConnector = authConnector;
     }
 
     public Flux<ProductResponse> getProducts() {
         log.info("API get products");
-        return webClient.get()
-                .uri("/api/products")
-                .retrieve()
-                .bodyToFlux(ProductResponse.class)
-                .doOnNext(productResponse -> log.info("API getting product: {}",
-                        JsonTransferUtil.objectToJson(productResponse)))
-                .doOnError(throwable -> log.error("API getting products failed {}", throwable.getMessage()));
+        return authConnector.getAuthToken()
+                .flatMapMany(token -> webClient.get()
+                        .uri("/api/products")
+                        .header("Authorization",  token)
+                        .retrieve()
+                        .bodyToFlux(ProductResponse.class)
+                        .doOnNext(productResponse -> log.info("API getting product: {}",
+                                JsonTransferUtil.objectToJson(productResponse)))
+                        .doOnError(throwable -> log.error("API getting products failed {}", throwable.getMessage()))
+                );
     }
 
     public Mono<BalanceBeanResponse> findBalanceByProductId(String productId) {
         log.info("API findBalanceByProductId RQ: {}", productId);
-        return webClient.get()
-                .uri("/api/products/" + productId + "/balance")
-                .retrieve()
-                .bodyToMono(BalanceBeanResponse.class)
-                .doOnNext(balanceBeanResponse -> log.info("API findBalanceByProductId RS: {}",
-                        JsonTransferUtil.objectToJson(balanceBeanResponse)))
-                .doOnError(error -> log.error("Error API while getting balance by product: {}", error.getMessage()));
+        return authConnector.getAuthToken()
+                .flatMap(token -> webClient.get()
+                        .uri("/api/products/" + productId + "/balance")
+                        .header("Authorization",  token)
+                        .retrieve()
+                        .bodyToMono(BalanceBeanResponse.class)
+                        .doOnNext(balanceBeanResponse -> log.info("API findBalanceByProductId RS: {}",
+                                JsonTransferUtil.objectToJson(balanceBeanResponse)))
+                        .doOnError(error -> log.error("Error API while getting balance by product: {}", error.getMessage()))
+                );
     }
 }

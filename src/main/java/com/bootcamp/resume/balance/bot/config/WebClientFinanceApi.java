@@ -15,8 +15,8 @@ public class WebClientFinanceApi {
     @Value("${client.api.gateway}")
     String clientFinance;
 
-    @Bean(name = "webClientFinanceService")
-    public WebClient webClientFinanceService(WebClient.Builder builder) {
+    @Bean(name = "webClientService")
+    public WebClient webClientService(WebClient.Builder builder) {
         return builder.baseUrl(clientFinance)
                 .filter(logRequest())
                 .filter(logResponse())
